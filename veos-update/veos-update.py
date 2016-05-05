@@ -39,7 +39,7 @@ def connect():
     node = pyeapi.connect(host=args.ip, password=password, return_node=True)
     return node
 
-# TODO: Ignore config headers.
+
 def config_diff(node):
     """Diffs the running-config and the startup-config. Requires a node as input
     so it can connect and get the configuration."""
