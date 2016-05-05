@@ -60,20 +60,18 @@ def config_backup(node):
     print "\n\nBacked up the current startup-config to " + file + ".\n"
 
 
-## TODO: Need to figure out how to go back to asking question if neither y or n is entered.
 def config_write(node):
     """Copies the running-config to the startup-config. Takes node as input to issue
     the copy command."""
     question = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
+    while not question in ['y','n']:
+        question = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
     if question == 'y':
         node.enable('copy running-config startup-config')
         config_backup(node)
         print "Writing configuration."
-    elif question == 'n':
+    if question == 'n':
         print "Aborting script."
-        sys.exit()
-    else:
-        print "Aborting script. Please enter y or n."
         sys.exit()
 
 
@@ -81,10 +79,12 @@ def reload(node):
     """Reloads the switch. Note that "reload force" is required - normal reload requires user input.
     Takes node as input to issue the reload command."""
     question = str(raw_input('Reload now? y/n: ')).lower().strip()
+    while not question in ['y','n']:
+        question = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
     if question == 'y':
         node.enable('reload force')
         print "Reloading vEOS."
-    elif question == 'n':
+    if question == 'n':
         print "Aborting script. Please reload the switches for changes to take effect."
         sys.exit()
 
