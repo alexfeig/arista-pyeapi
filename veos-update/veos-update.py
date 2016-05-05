@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 """This script will update a vEOS virtual machine to a different vEOS image.
-It leverages a few different modules, so please make sure they are installed prior to running.
+
+It leverages a few different modules, so please make sure they are installed prior to running - you
+can use pip install -r requirements.txt to do that.
+
 It also requires a user with privilege 15 access and http transport, and does not support an enable
 password at this time.
 
@@ -45,7 +48,9 @@ def config_diff(node):
 
     diff = difflib.unified_diff(running, startup)
     for line in diff:
-        print(line)
+        if 'boot' in line:
+            for line in diff:
+                print(line)
 
 
 def config_backup(node):
