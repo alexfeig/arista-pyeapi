@@ -11,7 +11,7 @@ from datetime import datetime
 parser = argparse.ArgumentParser(description='Upgrades a virtual machine running vEOS to another .swi version.')
 parser.add_argument('-u', '--user', type=str, help='vEOS Username - must have privilege 15', required=True)
 parser.add_argument('-i', '--ip', type=str, help='vEOS IP Address', required=True)
-# TODO: parser.add_argument('-s', '--swi', type=str, help='SWI Image', required=True)
+parser.add_argument('-s', '--swi', type=str, help='SWI Image', required=True)
 args = parser.parse_args()
 
 # Gathers password.
@@ -23,6 +23,7 @@ password = getpass.getpass("vEOS Password: ")
 node = pyeapi.connect(host=args.ip,password=password,return_node=True)
 
 # Copy running-config to startup-config
+# TODO: Diff run/start and prompt to save.
 node.enable('copy running-config startup-config')
 
 ssh = SSHClient()
@@ -34,8 +35,11 @@ ssh.connect(hostname=args.ip,username=args.user,password=password)
 scp = SCPClient(ssh.get_transport())
 
 # Backup Config
-# TODO: Add exception here to catch non priv15
+# TODO: Add exception here to catch non priv15.
 datetime = datetime.now().strftime("%Y%m%d-%H%M%S")
 scp.get('/mnt/flash/startup-config',args.ip + '-startup-config-' + datetime)
+
+# Copy SWI Image
+scp.put(args.swi,remote_path='/mnt/flash/')
 
 scp.close()
