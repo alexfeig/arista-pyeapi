@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import getpass
+from getpass import getpass
+import difflib
 import pyeapi
 import argparse
 from paramiko import SSHClient
@@ -16,38 +17,50 @@ parser.add_argument('-s', '--swi', type=str, help='SWI Image', required=True)
 args = parser.parse_args()
 
 # Gathers password.
-password = getpass.getpass("vEOS Password: ")
+password = getpass("Enter your vEOS Password: ")
 
-# Note - if you don't use return_node=True, enable is not available.
-# See https://github.com/arista-eosplus/pyeapi/blob/develop/pyeapi/client.py#L386
-# Also see https://github.com/arista-eosplus/pyeapi/issues/37
-# Let's start by connecting to the vEOS VM
-node = pyeapi.connect(host=args.ip,password=password,return_node=True)
 
-# Copy running-config to startup-config
-# TODO: Diff run/start and prompt to save.
-node.enable('copy running-config startup-config')
+def connect():
+    node = pyeapi.connect(host=args.ip, password=password, return_node=True)
+    return node
 
-ssh = SSHClient()
-# If you don't do this below, it won't accept the host key.
-ssh.load_system_host_keys()
-# Connect to SSH
-ssh.connect(hostname=args.ip,username=args.user,password=password)
-# Paramiko - set transport to SSH
-scp = SCPClient(ssh.get_transport())
 
-# Backup Config
-# TODO: Add exception here to catch non priv15.
-datetime = datetime.now().strftime("%Y%m%d-%H%M%S")
-scp.get('/mnt/flash/startup-config',args.ip + '-startup-config-' + datetime)
+def diff(node):
+    running = node.get_config(config="running-config")
+    startup = node.get_config(config="startup-config")
 
-# Copy SWI Image
-# TODO: Add in some sort of feedback here so folks know it's copying the file. Also, add error handling
-scp.put(args.swi,remote_path='/mnt/flash/')
+    diff = difflib.unified_diff(running, startup)
+    for line in diff:
+        print(line)
 
-node.config(('boot system flash:/'+args.swi))
+## TODO: Need to figure out how to go back to asking question if neither y or n is entered.
+def write_config(node):
+    overwrite = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
+    if overwrite == 'y':
+        node.enable('copy running-config startup-config')
+        print "Writing configuration."
+    elif overwrite == 'n':
+        print "Aborting script."
+    else:
+        print "Aborting script. Please enter y or n."
 
-scp.close()
 
-# If force isn't used, API will not allow for a reload.
-node.enable('reload force')
+def backup_config(node):
+    startup = str(node.get_config(config="startup-config"))
+    dt = datetime.now().strftime("%Y%m%d-%H%M%S")
+    file = args.ip + '-startup-config-' + dt
+    f = open(file,'w')
+    f.write(startup)
+    f.close()
+    print "\n\nBacked up the current startup-config to " + file + ".\n"
+
+
+def main():
+    node = connect()
+    diff(node)
+    backup_config(node)
+    write_config(node)
+
+
+if __name__ == "__main__":
+    main()
