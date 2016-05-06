@@ -1,9 +1,14 @@
-This script will take an IP address and username as arguments and use SCP to copy a vEOS .swi image to a veos virtual machine. It will then set the boot image to the new .swi and reload it.
+This script will update a vEOS virtual machine to a different vEOS image.
 
-Prior to updating, it will write the configuration.
+It leverages a few different modules, so please make sure they are installed prior to running - you
+can use ``sudo pip install -r requirements.txt`` to do that.
+
+It also requires a user with privilege 15 access and https transport, and does not support an enable
+password at this time.
+
+Example:
+   `` ./veos-update.py -u admin -i 192.168.56.10 -s vEOS-lab-4.15.6M.swi``
 
 Todo:
 
-* Downgrade handling?
 * Release notes?
-* Diff config before saving?
