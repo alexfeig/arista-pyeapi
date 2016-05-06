@@ -41,9 +41,6 @@ def get_args():
     return args
 
 
-password = getpass("Enter your vEOS Password: ")
-
-
 def config_diff(node):
     """Diffs the running-config and the startup-config. Requires a node as input
     so it can connect and get the configuration."""
@@ -118,6 +115,8 @@ def config_boot(node, swi):
 
 def main():
     args = get_args()
+
+    password = getpass("Enter your vEOS Password: ")
 
     node = pyeapi.connect(host=args.ip, password=password, return_node=True)
     config_diff(node)
