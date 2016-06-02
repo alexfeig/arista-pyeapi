@@ -42,8 +42,9 @@ def get_args():
 
 
 def config_diff(node):
-    """Diffs the running-config and the startup-config. Requires a node as input
-    so it can connect and get the configuration."""
+    """Diffs the running-config and the startup-config.
+
+    Requires node to set the device."""
     running = node.get_config(config="running-config")
     startup = node.get_config(config="startup-config")
 
@@ -55,8 +56,10 @@ def config_diff(node):
 
 
 def config_write(node, ip):
-    """Copies the running-config to the startup-config. Takes node as input to issue
-    the copy command."""
+    """Copies the running-config to the startup-config.
+
+    Requires node to set the device.
+    Requires IP to backup the configuration."""
     question = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
     while not question in ['y', 'n']:
         question = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
@@ -71,7 +74,10 @@ def config_write(node, ip):
 
 def config_backup(node, ip):
     """Backs up the startup-configuration to a file with the IP address and timestamp
-    in the filename. Takes node as input to get the configuration"""
+    in the filename.
+
+    Requires node to set the device.
+    Requires IP to set the filename for the backup file."""
     startup = str(node.get_config(config="startup-config"))
     dt = datetime.now().strftime("%Y%m%d-%H%M%S")
     file = ip + '-startup-config-' + dt
@@ -83,7 +89,8 @@ def config_backup(node, ip):
 
 def reload(node):
     """Reloads the switch. Note that "reload force" is required - normal reload requires user input.
-    Takes node as input to issue the reload command."""
+
+    Requires node to set the device."""
     question = str(raw_input('Reload now? y/n: ')).lower().strip()
     while not question in ['y', 'n']:
         question = str(raw_input('Save configuration as shown? y/n: ')).lower().strip()
@@ -97,7 +104,11 @@ def reload(node):
 
 def scp(file, path, ip, user, password):
     """Uses paramiko and scp module built on top of it to SCP vEOS to the VM.
-    Inputs are the .swi filename from arguments, and a path."""
+
+    Requires filename to set the SWI image.
+    Requires path to set the path to copy the file to on the remote system (hardcoded to /mnt/flash).
+    Requires user for the SCP username.
+    Requires password for the SCP password."""
     ssh = SSHClient()
     ssh.load_system_host_keys()
     ssh.connect(hostname=ip, username=user, password=password)
@@ -109,7 +120,9 @@ def scp(file, path, ip, user, password):
 
 def config_boot(node, swi):
     """Configures the boot parameter. Note that it doesn't require a save of the configuration.
-    Takes node as an input to issue the commad."""
+
+    Requires node to set the device.
+    Requires swi to set the boot variable to the new image"""
     node.config(('boot system flash:/' + swi))
 
 
