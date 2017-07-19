@@ -30,6 +30,7 @@ def get_args():
                         help='vEOS Username - must have privilege 15',
                         required=True)
     parser.add_argument('-i', '--ip',
+    parser.add_argument('-i', '--ip',
                         type=str,
                         help='vEOS IP Address',
                         required=True)

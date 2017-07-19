@@ -34,7 +34,7 @@ def get_args():
 
 
 def get_side(side):
-    ip = '192.168.56.10' if side == 'right' else '192.168.56.11' if side == 'left' else sys.exit('Invalid side.')
+    ip = '172.16.50.21' if side == 'right' else '172.16.50.22' if side == 'left' else sys.exit('Invalid side.')
     return ip
 
 
